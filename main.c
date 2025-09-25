@@ -3,9 +3,9 @@
 #include <time.h>
 #include "mochila.h"
 
-MOCHILA *ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo);
-MOCHILA *Guloso(ITEM **todosItens, int quantItens, float pesoMaximo);
-void ProgramacaoDinamica(ITEM **todosItens, float quantItens);
+void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo);
+void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo);
+void ProgramacaoDinamica(ITEM **todosItens, int quantItens, float pesoMaximo);
 
 ITEM **OrdenarPorRazao(ITEM **todosItens, int quantItens);
 
@@ -26,30 +26,21 @@ int main(){
     todosItens = (ITEM **)calloc(quantidadeItens, sizeof(ITEM *));
 
     for(int i = 0; i < quantidadeItens; i++){
-        int chave;
         float peso, valor;
-        printf("Digite a chave do item %d: ", i + 1);
-        scanf(" %d", &chave);
         printf("Digite o peso do item %d: ", i + 1);
         scanf(" %f", &peso);
         printf("Digite o valor do item %d: ", i + 1);
         scanf(" %f", &valor);
         printf("\n");
-        if(peso <= pesoMaximo)
-            todosItens[i] = ItemCriar(peso, valor, chave);
+        if(peso <= pesoMaximo){
+            todosItens[i] = ItemCriar(peso, valor, i + 1);
+        }
     }
 
-    //Solucoes
+    //Forca Bruta
+    ForcaBruta(todosItens, quantidadeItens, pesoMaximo);
 
-    //Forca bruta
-    if(quantidadeItens <= 20){ //Se for maior que 20, vai ser extremamente demorado o processo
-        MOCHILA *mochilaBruta = ForcaBruta(todosItens, quantidadeItens, pesoMaximo);
-        
-        MochilaEsvaziar(mochilaBruta);
-        MochilaApagar(&mochilaBruta);
-    }
-
-    //Guloso
+    /*//Guloso
     MOCHILA *mochilaGulosa = Guloso(todosItens, quantidadeItens, pesoMaximo);
 
     MochilaEsvaziar(mochilaGulosa);
@@ -58,7 +49,7 @@ int main(){
     //Programacao dinamica
     ProgramacaoDinamica(todosItens, quantidadeItens, pesoMaximo);
 
-
+    */
     //Libera a memoria dos itens e da mochila
     for(int i = 0; i < quantidadeItens; i++){
         free(todosItens[i]);
@@ -71,28 +62,79 @@ int main(){
     return 0;
 }
 
-MOCHILA *ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
-    if(todosItens){
+void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
+    //Limita a quantidade de itens para 25, se for maior que isso fica muito longo
+    if(todosItens && quantItens <= 25){
+        //Medir o tempo de execução
+        clock_t inicio, fim;
+        double tempoExec;
+        inicio = clock();
+
         MOCHILA *mochila = MochilaCriar(pesoMaximo);
+        float melhorValor = 0, melhorPeso = 0;
+        int melhorCombinacao;
 
-        for(int i = 0; i < quantItens; i++){
-            
+        //2^quantItens Ex: 16 combinacoes = 10000 binario
+        int totalCombinacoes = 1 << quantItens;
+        
+        //Testa todas as combinacoes possiveis
+        for(int combinacoes = 1; combinacoes < totalCombinacoes; combinacoes++){
+            //Garante que a mochila esta vazia
+            MochilaEsvaziar(mochila);
+            bool combinacaoValida = true;
+
+            //Teste de combinacoes de itens
+            for(int i = 0; i < quantItens; i++){
+                //Seleciona o item a ser adicionado na mochila através de operacao com bits
+                if(combinacoes & (1 << i)){
+                    if(MochilaCabe(mochila, todosItens[i])){
+                        MochilaAdicionarItem(mochila, todosItens[i]);
+                    }
+                    else{
+                        combinacaoValida = false;
+                        break;
+                    }
+                }
+            }
+
+            //Escolhe a melhor combinacao
+            if(combinacaoValida && MochilaGetValor(mochila) >= melhorValor){
+                melhorValor = MochilaGetValor(mochila);
+                melhorPeso = MochilaGetPeso(mochila);
+                melhorCombinacao = combinacoes;
+            }
         }
-    }
+        
+        //Printa todas as informacoes do resultado
+        printf("Método por Força Bruta!\n");
+        printf("Melhor Peso: %.2f\n", melhorPeso);
+        printf("Melhor valor: %.2f\n", melhorValor);
+        printf("Melhor combinação de itens:\n");
+        for(int i = 0; i < quantItens; i++){
+            if(melhorCombinacao & (1 << i)){
+                printf("Item %d\n", i + 1);
+            }
+        }
+        printf("\n");
+        
+        MochilaApagar(&mochila);
 
-    return NULL;
+        //Medir tempo de execucao do codigo
+        fim = clock();
+        tempoExec = ((double) (fim - inicio) / CLOCKS_PER_SEC);
+        printf("Tempo de execução: %.5lf segundos!\n", tempoExec);
+    }  
+    else
+        printf("Muitos itens para calcular por força bruta! (máximo de 20 itens).\n");
 }
 
-MOCHILA *Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
+void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     if(todosItens){
         MOCHILA *mochila = MochilaCriar(pesoMaximo);
         for(int i = 0; i < quantItens; i++){
             
         }
-        return mochila;
     }
-
-    return NULL;
 }
 
 void ProgramacaoDinamica(ITEM **todosItens, int quantItens, float pesoMaximo){
@@ -101,8 +143,4 @@ void ProgramacaoDinamica(ITEM **todosItens, int quantItens, float pesoMaximo){
             
         }
     }
-}
-
-ITEM **OrdenarPorRazao(ITEM **todosItens, int quantItens){
-    
 }

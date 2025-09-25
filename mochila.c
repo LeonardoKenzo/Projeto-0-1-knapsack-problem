@@ -56,7 +56,7 @@ bool MochilaAdicionarItem(MOCHILA *mochila, ITEM *item){
         return false;
     }
     //Se o peso do item estourar o peso maximo nao adiciona
-    if(mochila->pesoAtual + ItemGetPeso(item) >= mochila->pesoMaximo){
+    if(mochila->pesoAtual + ItemGetPeso(item) > mochila->pesoMaximo){
         return false;
     }
 
@@ -186,7 +186,7 @@ bool MochilaEsvaziar(MOCHILA *mochila){
 //Apaga a mochila
 void MochilaApagar(MOCHILA **mochila){
     if(mochila && *mochila){
-        MochilaEsvaziar(mochila);
+        MochilaEsvaziar(*mochila);
         free(*mochila);
         *mochila = NULL;
     }
