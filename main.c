@@ -64,7 +64,7 @@ int main(){
 
 void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
     //Limita a quantidade de itens para 25, se for maior que isso fica muito longo
-    if(todosItens && quantItens <= 25){
+    if(todosItens && quantItens <= 30){
         //Medir o tempo de execução
         clock_t inicio, fim;
         double tempoExec;
