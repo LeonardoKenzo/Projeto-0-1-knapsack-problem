@@ -45,11 +45,11 @@ int main(){
 
     MochilaEsvaziar(mochilaGulosa);
     MochilaApagar(&mochilaGulosa);
+    */
     
     //Programacao dinamica
     ProgramacaoDinamica(todosItens, quantidadeItens, pesoMaximo);
 
-    */
     //Libera a memoria dos itens e da mochila
     for(int i = 0; i < quantidadeItens; i++){
         free(todosItens[i]);
@@ -63,8 +63,8 @@ int main(){
 }
 
 void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
-    //Limita a quantidade de itens para 25, se for maior que isso fica muito longo
-    if(todosItens && quantItens <= 30){
+    //Limita a quantidade de itens para 20, se for maior que isso fica muito longo
+    if(todosItens && quantItens <= 20){
         //Medir o tempo de execução
         clock_t inicio, fim;
         double tempoExec;
@@ -115,14 +115,14 @@ void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
                 printf("Item %d\n", i + 1);
             }
         }
-        printf("\n");
-        
         MochilaApagar(&mochila);
-
+        
         //Medir tempo de execucao do codigo
         fim = clock();
         tempoExec = ((double) (fim - inicio) / CLOCKS_PER_SEC);
         printf("Tempo de execução: %.5lf segundos!\n", tempoExec);
+        
+        printf("\n");
     }  
     else
         printf("Muitos itens para calcular por força bruta! (máximo de 20 itens).\n");
@@ -139,8 +139,15 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
 
 void ProgramacaoDinamica(ITEM **todosItens, int quantItens, float pesoMaximo){
     if(todosItens){
-        for(int i = 0; i < quantItens; i++){
-            
+        int **dp = (int **)calloc(quantItens + 1, sizeof(int *));
+        for(int i = 0; i < pesoMaximo; i++){
+            dp[i] = (int *)calloc(pesoMaximo + 1, sizeof(int));
+        }
+
+        for(int i = 1; i < quantItens; i++){
+            for(int p = 0; p < pesoMaximo; p++){
+                
+            }            
         }
     }
 }
