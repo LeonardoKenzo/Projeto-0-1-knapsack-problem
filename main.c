@@ -5,7 +5,7 @@
 
 void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo);
 void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo);
-void ProgramacaoDinamica(ITEM **todosItens, int quantItens, float pesoMaximo);
+void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo);
 
 ITEM **OrdenarPorRazao(ITEM **todosItens, int quantItens);
 
@@ -137,17 +137,85 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     }
 }
 
-void ProgramacaoDinamica(ITEM **todosItens, int quantItens, float pesoMaximo){
-    if(todosItens){
-        int **dp = (int **)calloc(quantItens + 1, sizeof(int *));
-        for(int i = 0; i < pesoMaximo; i++){
-            dp[i] = (int *)calloc(pesoMaximo + 1, sizeof(int));
-        }
+void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo){
+    if(!todosItens){
+        return;
+    }
 
-        for(int i = 1; i < quantItens; i++){
-            for(int p = 0; p < pesoMaximo; p++){
-                
-            }            
+    //Mede o tempo de execucao
+    clock_t inicio, fim;
+    double tempoExec;
+    inicio = clock();
+
+    //Aloca memoria
+    float **programacaoDinamica = (float **)calloc(quantItens + 1, sizeof(float *));
+    for(int i = 0; i <= quantItens; i++){
+        programacaoDinamica[i] = (float *)calloc(pesoMaximo + 1, sizeof(float));
+    }
+
+    //Itera pelos itens e pelos pesos de cada itens
+    for(int i = 1; i <= quantItens; i++){
+        for(int p = 0; p <= pesoMaximo; p++){
+            //Não pega o item 1
+            programacaoDinamica[i][p] = programacaoDinamica[i - 1][p];
+
+            if (ItemGetPeso(todosItens[i - 1]) <= p) {
+            int valorComItem = programacaoDinamica[i - 1][p - (int)ItemGetPeso(todosItens[i - 1])] + ItemGetValor(todosItens[i - 1]);
+
+                if (valorComItem > programacaoDinamica[i][p]) {
+                    programacaoDinamica[i][p] = valorComItem;
+                }
+            }
+        }            
+    }
+
+    //Rastreia quais itens foram selecionados
+    int p = pesoMaximo;
+    int *itensSelecionados = (int *)calloc(quantItens, sizeof(int));
+    int quantidadeSelecionados = 0;
+    float melhorValor = 0;
+    float melhorPeso = 0;
+    for (int i = quantItens; i > 0 && p > 0; i--) {
+
+        //Se o valor mudou, o item i-1 foi incluído
+        if (programacaoDinamica[i][p] != programacaoDinamica[i - 1][p]) {
+            itensSelecionados[quantidadeSelecionados] = i - 1;
+            quantidadeSelecionados++;
+            melhorPeso += ItemGetPeso(todosItens[i - 1]);
+            p -= ItemGetPeso(todosItens[i - 1]);
+            melhorValor += ItemGetValor(todosItens[i - 1]);
         }
     }
+
+    //Inverter ordem dos itens (foram adicionados de trás para frente)
+    for (int i = 0; i < quantidadeSelecionados / 2; i++) {
+        int temp = itensSelecionados[i];
+        int j = quantidadeSelecionados - 1 - i;
+        itensSelecionados[i] = itensSelecionados[j];
+        itensSelecionados[j] = temp;
+    }
+    
+    //Liberar memória da tabela DP
+    for (int i = 0; i <= quantItens; i++) {
+        free(programacaoDinamica[i]);
+    }
+    free(programacaoDinamica);
+
+    //Printa todas as informacoes do resultado
+    printf("Método por Programação Dinâmica!\n");
+    printf("Melhor Peso: %.2f\n", melhorPeso);
+    printf("Melhor valor: %.2f\n", melhorValor);
+    printf("Melhor combinação de itens:\n");
+    for(int i = 0; i < quantidadeSelecionados; i++){
+        printf("Item %d\n", itensSelecionados[i] + 1);
+    }
+
+    free(itensSelecionados);
+    
+    //Medir tempo de execucao do codigo
+    fim = clock();
+    tempoExec = ((double) (fim - inicio) / CLOCKS_PER_SEC);
+    printf("Tempo de execução: %.5lf segundos!\n", tempoExec);
+    
+    printf("\n");
 }
