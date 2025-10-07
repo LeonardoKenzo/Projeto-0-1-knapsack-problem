@@ -159,7 +159,7 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     }
     MOCHILA *mochila = MochilaCriar(pesoMaximo);
     float melhorValor = 0, melhorPeso = 0; 
-    int itensSelecionados[quantItens];
+    int *itensSelecionados = (int *)calloc(quantItens, sizeof(int));
     int quantidadeSelecionados = 0;
 
     for(int i = 0; i < quantItens; i++){
@@ -180,6 +180,9 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     }
 
     MochilaApagar(&mochila);
+    free(ordenados);
+    free(usado);
+    free(itensSelecionados);
 
     fim = clock();
     tempoExec = ((double) (fim - inicio) / CLOCKS_PER_SEC);
