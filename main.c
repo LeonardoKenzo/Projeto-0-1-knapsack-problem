@@ -40,12 +40,8 @@ int main(){
     //Forca Bruta
     ForcaBruta(todosItens, quantidadeItens, pesoMaximo);
 
-    /*//Guloso
-    MOCHILA *mochilaGulosa = Guloso(todosItens, quantidadeItens, pesoMaximo);
-
-    MochilaEsvaziar(mochilaGulosa);
-    MochilaApagar(&mochilaGulosa);
-    */
+    //Guloso
+    Guloso(todosItens, quantidadeItens, pesoMaximo);
     
     //Programacao dinamica
     ProgramacaoDinamica(todosItens, quantidadeItens, pesoMaximo);
@@ -137,8 +133,8 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     double tempoExec;
     inicio = clock();
 
-    ITEM *ordenados[quantItens];
-    bool usado[quantItens];
+    ITEM **ordenados = (ITEM **)calloc(quantItens, sizeof(ITEM *));
+    bool *usado = (bool *)calloc(quantItens, sizeof(bool));
     for(int i = 0; i< quantItens; i++){
         ordenados[i] = todosItens[i];
         usado[i] = false;
