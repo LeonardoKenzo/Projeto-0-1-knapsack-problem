@@ -8,5 +8,6 @@
     float ItemGetPeso(ITEM *item);
     int ItemGetChave(ITEM *item);
     void ItemApagar(ITEM **item);
+    float ItemGetRazao(ITEM *item);
 
 #endif

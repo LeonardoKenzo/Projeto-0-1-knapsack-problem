@@ -129,13 +129,69 @@ void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
 }
 
 void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
-    if(todosItens){
-        MOCHILA *mochila = MochilaCriar(pesoMaximo);
-        for(int i = 0; i < quantItens; i++){
-            
+    if(!todosItens || quantItens <= 0){
+        return;
+    }
+
+    clock_t inicio, fim;
+    double tempoExec;
+    inicio = clock();
+
+    ITEM *ordenados[quantItens];
+    bool usado[quantItens];
+    for(int i = 0; i< quantItens; i++){
+        ordenados[i] = todosItens[i];
+        usado[i] = false;
+    }
+    //Ordena os itens pela razao valor/peso
+    for(int i = 0; i < quantItens; i++){
+        int melhor = -1;
+        float melhorRazao = -1;
+        for(int j = 0; j < quantItens; j++){
+            if(!usado[j] && todosItens[j] != NULL){
+                float razao = ItemGetRazao(todosItens[j]);
+                if(razao > melhorRazao){
+                    melhorRazao = razao;
+                    melhor = j;
+                }
+            }
+        }
+        if (melhor != -1) {
+            ordenados[i] = todosItens[melhor];
+            usado[melhor] = true;
         }
     }
+    MOCHILA *mochila = MochilaCriar(pesoMaximo);
+    float melhorValor = 0, melhorPeso = 0; 
+    int itensSelecionados[quantItens];
+    int quantidadeSelecionados = 0;
+
+    for(int i = 0; i < quantItens; i++){
+        if(ordenados[i] && MochilaCabe(mochila, ordenados[i])){
+            MochilaAdicionarItem(mochila, ordenados[i]);
+            itensSelecionados[quantidadeSelecionados++] = ItemGetChave(ordenados[i]);
+            melhorPeso += ItemGetPeso(ordenados[i]);
+            melhorValor += ItemGetValor(ordenados[i]);
+        }
+    }
+
+    printf("Método Guloso!\n");
+    printf("Melhor Peso: %.2f\n", melhorPeso);
+    printf("Melhor valor: %.2f\n", melhorValor);
+    printf("Melhor combinação de itens:\n");
+    for(int i = 0; i < quantidadeSelecionados; i++){
+        printf("Item %d\n", itensSelecionados[i]);
+    }
+
+    MochilaApagar(&mochila);
+
+    fim = clock();
+    tempoExec = ((double) (fim - inicio) / CLOCKS_PER_SEC);
+    printf("Tempo de execução: %.5lf segundos!\n", tempoExec);
+    printf("\n");
 }
+
+
 
 void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo){
     if(!todosItens){
