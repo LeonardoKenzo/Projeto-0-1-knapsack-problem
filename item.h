@@ -3,11 +3,11 @@
 
     typedef struct item_ ITEM;
 
-    ITEM *ItemCriar(float peso, float valor, int chave);
-    float ItemGetValor(ITEM *item);
-    float ItemGetPeso(ITEM *item);
+    ITEM *ItemCriar(int peso, int valor, int chave);
+    int ItemGetValor(ITEM *item);
+    int ItemGetPeso(ITEM *item);
     int ItemGetChave(ITEM *item);
     void ItemApagar(ITEM **item);
-    float ItemGetRazao(ITEM *item);
+    int ItemGetRazao(ITEM *item);
 
 #endif

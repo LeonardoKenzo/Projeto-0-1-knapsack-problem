@@ -3,20 +3,20 @@
 #include <time.h>
 #include "mochila.h"
 
-void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo);
-void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo);
+void ForcaBruta(ITEM **todosItens, int quantItens, int pesoMaximo);
+void Guloso(ITEM **todosItens, int quantItens, int pesoMaximo);
 void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo);
 
 ITEM **OrdenarPorRazao(ITEM **todosItens, int quantItens);
 
 int main(){
-    float pesoMaximo;
+    int pesoMaximo;
     int quantidadeItens;
     ITEM **todosItens;
     
     //Pega o valor maximo
     printf("Digite o peso máximo da mochila: ");
-    scanf(" %f", &pesoMaximo);
+    scanf(" %d", &pesoMaximo);
     
     //Cria todos os itens para inserir
     printf("Digite a quantidade de itens para inserir na mochila: ");
@@ -26,11 +26,11 @@ int main(){
     todosItens = (ITEM **)calloc(quantidadeItens, sizeof(ITEM *));
 
     for(int i = 0; i < quantidadeItens; i++){
-        float peso, valor;
+        int peso, valor;
         printf("Digite o peso do item %d: ", i + 1);
-        scanf(" %f", &peso);
+        scanf(" %d", &peso);
         printf("Digite o valor do item %d: ", i + 1);
-        scanf(" %f", &valor);
+        scanf(" %d", &valor);
         printf("\n");
         if(peso <= pesoMaximo){
             todosItens[i] = ItemCriar(peso, valor, i + 1);
@@ -58,16 +58,16 @@ int main(){
     return 0;
 }
 
-void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
-    //Limita a quantidade de itens para 20, se for maior que isso fica muito longo
-    if(todosItens && quantItens <= 20){
+void ForcaBruta(ITEM **todosItens, int quantItens, int pesoMaximo){
+    //Limita a quantidade de itens para 25, se for maior que isso fica muito longo
+    if(todosItens && quantItens <= 25){
         //Medir o tempo de execução
         clock_t inicio, fim;
         double tempoExec;
         inicio = clock();
 
         MOCHILA *mochila = MochilaCriar(pesoMaximo);
-        float melhorValor = 0, melhorPeso = 0;
+        int melhorValor = 0, melhorPeso = 0;
         int melhorCombinacao;
 
         //2^quantItens Ex: 16 combinacoes = 10000 binario
@@ -96,15 +96,19 @@ void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
             //Escolhe a melhor combinacao
             if(combinacaoValida && MochilaGetValor(mochila) >= melhorValor){
                 melhorValor = MochilaGetValor(mochila);
-                melhorPeso = MochilaGetPeso(mochila);
                 melhorCombinacao = combinacoes;
             }
         }
-        
+        //Calcula o melhor peso
+        for(int i = 0; i < quantItens; i++){
+            if(melhorCombinacao & (1 << i))
+                melhorPeso += ItemGetPeso(todosItens[i]);
+        }
+
         //Printa todas as informacoes do resultado
         printf("Método por Força Bruta!\n");
-        printf("Melhor Peso: %.2f\n", melhorPeso);
-        printf("Melhor valor: %.2f\n", melhorValor);
+        printf("Melhor Peso: %d\n", melhorPeso);
+        printf("Melhor valor: %d\n", melhorValor);
         printf("Melhor combinação de itens:\n");
         for(int i = 0; i < quantItens; i++){
             if(melhorCombinacao & (1 << i)){
@@ -121,10 +125,10 @@ void ForcaBruta(ITEM **todosItens, int quantItens, float pesoMaximo){
         printf("\n");
     }  
     else
-        printf("Muitos itens para calcular por força bruta! (máximo de 20 itens).\n");
+        printf("Muitos itens para calcular por força bruta! (máximo de 25 itens).\n\n");
 }
 
-void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
+void Guloso(ITEM **todosItens, int quantItens, int pesoMaximo){
     if(!todosItens || quantItens <= 0){
         return;
     }
@@ -142,10 +146,10 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     //Ordena os itens pela razao valor/peso
     for(int i = 0; i < quantItens; i++){
         int melhor = -1;
-        float melhorRazao = -1;
+        int melhorRazao = -1;
         for(int j = 0; j < quantItens; j++){
             if(!usado[j] && todosItens[j] != NULL){
-                float razao = ItemGetRazao(todosItens[j]);
+                int razao = ItemGetRazao(todosItens[j]);
                 if(razao > melhorRazao){
                     melhorRazao = razao;
                     melhor = j;
@@ -158,7 +162,7 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
         }
     }
     MOCHILA *mochila = MochilaCriar(pesoMaximo);
-    float melhorValor = 0, melhorPeso = 0; 
+    int melhorValor = 0, melhorPeso = 0; 
     int *itensSelecionados = (int *)calloc(quantItens, sizeof(int));
     int quantidadeSelecionados = 0;
 
@@ -172,8 +176,8 @@ void Guloso(ITEM **todosItens, int quantItens, float pesoMaximo){
     }
 
     printf("Método Guloso!\n");
-    printf("Melhor Peso: %.2f\n", melhorPeso);
-    printf("Melhor valor: %.2f\n", melhorValor);
+    printf("Melhor Peso: %d\n", melhorPeso);
+    printf("Melhor valor: %d\n", melhorValor);
     printf("Melhor combinação de itens:\n");
     for(int i = 0; i < quantidadeSelecionados; i++){
         printf("Item %d\n", itensSelecionados[i]);
@@ -203,9 +207,9 @@ void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo){
     inicio = clock();
 
     //Aloca memoria
-    float **programacaoDinamica = (float **)calloc(quantItens + 1, sizeof(float *));
+    int **programacaoDinamica = (int **)calloc(quantItens + 1, sizeof(int *));
     for(int i = 0; i <= quantItens; i++){
-        programacaoDinamica[i] = (float *)calloc(pesoMaximo + 1, sizeof(float));
+        programacaoDinamica[i] = (int *)calloc(pesoMaximo + 1, sizeof(int));
     }
 
     //Itera pelos itens e pelos pesos de cada itens
@@ -215,7 +219,7 @@ void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo){
             programacaoDinamica[i][p] = programacaoDinamica[i - 1][p];
 
             if (ItemGetPeso(todosItens[i - 1]) <= p) {
-            int valorComItem = programacaoDinamica[i - 1][p - (int)ItemGetPeso(todosItens[i - 1])] + ItemGetValor(todosItens[i - 1]);
+            int valorComItem = programacaoDinamica[i - 1][p - ItemGetPeso(todosItens[i - 1])] + ItemGetValor(todosItens[i - 1]);
 
                 if (valorComItem > programacaoDinamica[i][p]) {
                     programacaoDinamica[i][p] = valorComItem;
@@ -228,8 +232,8 @@ void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo){
     int p = pesoMaximo;
     int *itensSelecionados = (int *)calloc(quantItens, sizeof(int));
     int quantidadeSelecionados = 0;
-    float melhorValor = 0;
-    float melhorPeso = 0;
+    int melhorValor = 0;
+    int melhorPeso = 0;
     for (int i = quantItens; i > 0 && p > 0; i--) {
 
         //Se o valor mudou, o item i-1 foi incluído
@@ -258,8 +262,8 @@ void ProgramacaoDinamica(ITEM **todosItens, int quantItens, int pesoMaximo){
 
     //Printa todas as informacoes do resultado
     printf("Método por Programação Dinâmica!\n");
-    printf("Melhor Peso: %.2f\n", melhorPeso);
-    printf("Melhor valor: %.2f\n", melhorValor);
+    printf("Melhor Peso: %d\n", melhorPeso);
+    printf("Melhor valor: %d\n", melhorValor);
     printf("Melhor combinação de itens:\n");
     for(int i = 0; i < quantidadeSelecionados; i++){
         printf("Item %d\n", itensSelecionados[i] + 1);

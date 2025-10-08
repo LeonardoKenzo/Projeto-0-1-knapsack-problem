@@ -12,13 +12,13 @@ struct mochila_{
     NO *inicio;
     NO *fim;
     int quantidadeItens; //Tamanho da lista
-    float pesoAtual;
-    float pesoMaximo;
-    float valorTotal;
+    int pesoAtual;
+    int pesoMaximo;
+    int valorTotal;
 };
 
 
-MOCHILA *MochilaCriar(float pesoMaximo){
+MOCHILA *MochilaCriar(int pesoMaximo){
     //Cria a mochila
     MOCHILA *novaMochila = (MOCHILA *)calloc(1, sizeof(MOCHILA));
     if(novaMochila == NULL){
@@ -67,7 +67,7 @@ bool MochilaAdicionarItem(MOCHILA *mochila, ITEM *item){
     }
 
     //Se a mochila esta vazia
-    if(MochilaEstaVazia){
+    if(MochilaEstaVazia(mochila)){
         mochila->inicio = noItem;
         mochila->fim = noItem;
     }
@@ -121,13 +121,13 @@ ITEM *MochilaRemoverItem(MOCHILA *mochila, int chave){
     return NULL;
 }
 
-float MochilaGetValor(MOCHILA *mochila){
+int MochilaGetValor(MOCHILA *mochila){
     if(mochila)
         return mochila->valorTotal;
     return -1;
 }
 
-float MochilaGetPeso(MOCHILA *mochila){
+int MochilaGetPeso(MOCHILA *mochila){
     if(mochila)
         return mochila->pesoAtual;
     return -1;
